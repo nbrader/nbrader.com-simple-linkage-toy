@@ -3,17 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JavaScript Web App</title>
+    <title>Canvas Interaction</title>
     <style>
-        canvas {
-            display: block;
-            margin: 0 auto;
-            background-color: black;
-        }
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
     </style>
 </head>
 <body>
-    <canvas id="mainCanvas" width="1024" height="1024"></canvas>
-    <script src="SimpleLinkageToy.js"></script>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const screen_width = 1024;
+        const plot_frac = screen_width / (2 * Math.PI);
+        const screen_size = screen_width;
+
+        let refresh_screen = true;
+        let refresh_screen_from_timer = true;
+
+        let x1 = -163.046875;
+        let x2 = -283.28125;
+        let x3 = 410;
+        let x4 = 300;
+        let a_of_turn = 0.25;
+
+        const test_x1_min = -500;
+        const test_x1_max = 500;
+        const test_x2_min = -500;
+        const test_x2_max = 500;
+        const test_steps_per_dim = 120;
+        const test_circle_width = screen_width / test_steps_per_dim;
+
+        let view_test_grid = false;
+
+        const a_pos = { x: 350, y: 500 };
+
+        const plot_points = 100;
+        const test_angles = 100;
+
+        const test_tol = 1;
+
+        let mouseDown = false;
+        let mousePos = { x: 0, y: 0 };
+
+        function lerp(x0, x1, t) {
+            return x0 * (1 - t) + x1 * t;
+        }
+
+        function unlerp(x0, x1, t) {
+            return (t - x0) / (x1 - x0);
+        }
+
+        function sqr_distance(v0, v1) {
+            return (v1.x - v0.x) ** 2 + (v1.y - v0.y) ** 2;
+        }
+
+        function get_b_angles_1(a, x1, x2, x3, x4) {
+            const y_discriminant = x1 ** 2 + x4 ** 2 - 2 * x1 * x4 * Math.cos(a);
+            if (y_discriminant > 0) {
+                const y = Math.sqrt(y_discriminant);
+                const b1_arg = (x1 / y) * Math.sin(a);
+                if (b1_arg >= -1 && b1_arg <= 1) {
+                    const b1 = Math.asin(b1_arg);
+                    const denom = 2 * x2 * y;
+                    if (denom != 0) {
+                        const b2_arg = (x2 ** 2 + y ** 2 - x3 ** 2) / denom;
+                        if (b2_arg >= -1 && b2_arg <= 1) {
+                            const b2 = Math.acos(b2_arg);
+                            const b_plus = b1 + b2;
+                            const b_minus = b1 - b2;
+                            return [b_plus, b_minus];
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        function drawLine(color, x0, y0, x1, y1) {
+            ctx.strokeStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x0, y0);
+            ctx.lineTo(x1, y1);
+            ctx.stroke();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (view_test_grid && x4 != 0) {
+                for (let test_x1_it = 0; test_x1_it <= test_steps_per_dim; test_x1_it++) {
+                    for (let test_x2_it = 0; test_x2_it <= test_steps_per_dim; test_x2_it++) {
+                        const test_x1_frac = test_x1_it / (test_steps_per_dim + 1);
+                        const test_x1 = lerp(test_x1_min, test_x1_max, test_x1_frac);
+
+                        const test_x2_frac = test_x2_it / (test_steps_per_dim + 1);
+                        const test_x2 = lerp(test_x2_min, test_x2_max, test_x2_frac);
+
+                        const test_x3 = x3;
+                        const test_x4 = x4;
+
+                        let angles_were_given = false;
+                        let constraint_breaking_found = false;
+                        for (let test_a_it = 0; test_a_it < test_angles; test_a_it++) {
+                            const test_a = lerp(0, 2 * Math.PI, test_a_it / test_angles);
+                            const b_angles = get_b_angles_1(test_a, test_x1, test_x2, test_x3, test_x4);
+                            if (b_angles) {
+                                angles_were_given = true;
+                                const [b_plus, b_minus] = b_angles;
+
+                                const b_pos = { x: a_pos.x + test_x4, y: a_pos.y };
+                                const a = 2 * Math.PI * a_of_turn;
+                                const c_pos = { x: a_pos.x + test_x1 * Math.cos(a), y: a_pos.y + test_x1 * Math.sin(a) };
+
+                                const d_plus_pos = { x: b_pos.x + test_x2 * Math.cos(Math.PI - b_plus), y: b_pos.y + test_x2 * Math.sin(Math.PI - b_plus) };
+                                const d_minus_pos = { x: b_pos.x + test_x2 * Math.cos(Math.PI - b_minus), y: b_pos.y + test_x2 * Math.sin(Math.PI - b_minus) };
+
+                                const cdplus_sqr_dist = sqr_distance(c_pos, d_plus_pos);
+                                const cdminus_sqr_dist = sqr_distance(c_pos, d_minus_pos);
+
+                                if (Math.abs(cdplus_sqr_dist - test_x3 ** 2) > test_tol || Math.abs(cdminus_sqr_dist - test_x3 ** 2) > test_tol) {
+                                    constraint_breaking_found = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        const colour = constraint_breaking_found && angles_were_given ? 'red' : 'green';
+                        ctx.fillStyle = colour;
+                        ctx.beginPath();
+                        ctx.arc(lerp(0, screen_width, test_x1_frac), lerp(0, screen_width, test_x2_frac), test_circle_width, 0, 2 * Math.PI);
+                        ctx.fill();
+                    }
+                }
+            } else {
+                for (let plot_a_it = 0; plot_a_it < plot_points; plot_a_it++) {
+                    const plot_a = lerp(0, 2 * Math.PI, plot_a_it / plot_points);
+                    const b_angles = get_b_angles_1(plot_a, x1, x2, x3, x4);
+                    if (b_angles) {
+                        const [b_plus, b_minus] = b_angles;
+
+                        const a_in_screenspace = Math.round(plot_a * plot_frac);
+                        const b_plus_in_screenspace = Math.round(b_plus * plot_frac + screen_width / 2);
+                        const b_minus_in_screenspace = Math.round(b_minus * plot_frac + screen_width / 2);
+
+                        ctx.fillStyle = 'green';
+                        ctx.beginPath();
+                        ctx.arc(a_in_screenspace, b_plus_in_screenspace, 5, 0, 2 * Math.PI);
+                        ctx.fill();
+
+                        ctx.beginPath();
+                        ctx.arc(a_in_screenspace, b_minus_in_screenspace, 5, 0, 2 * Math.PI);
+                        ctx.fill();
+                    }
+                }
+
+                const b_pos = { x: a_pos.x + x4, y: a_pos.y };
+                const a = 2 * Math.PI * a_of_turn;
+                const c_pos = { x: a_pos.x + x1 * Math.cos(a), y: a_pos.y + x1 * Math.sin(a) };
+
+                drawLine('blue', a_of_turn * screen_width, 0, a_of_turn * screen_width, screen_width);
+
+                const b_angles = get_b_angles_1(a, x1, x2, x3, x4);
+                if (b_angles) {
+                    const [b_plus, b_minus] = b_angles;
+                    const d_plus_pos = { x: b_pos.x + x2 * Math.cos(Math.PI - b_plus), y: b_pos.y + x2 * Math.sin(Math.PI - b_plus) };
+                    const d_minus_pos = { x: b_pos.x + x2 * Math.cos(Math.PI - b_minus), y: b_pos.y + x2 * Math.sin(Math.PI - b_minus) };
+
+                    drawLine('red', b_pos.x, b_pos.y, d_plus_pos.x, d_plus_pos.y);
+                    drawLine('cyan', c_pos.x, c_pos.y, d_plus_pos.x, d_plus_pos.y);
+                    drawLine('white', b_pos.x, b_pos.y, d_minus_pos.x, d_minus_pos.y);
+                    drawLine('magenta', c_pos.x, c_pos.y, d_minus_pos.x, d_minus_pos.y);
+                }
+
+                drawLine('green', a_pos.x, a_pos.y, b_pos.x, b_pos.y);
+                drawLine('yellow', a_pos.x, a_pos.y, c_pos.x, c_pos.y);
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            mouseDown = true;
+            mousePos = { x: e.clientX, y: e.clientY };
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            mouseDown = false;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (mouseDown) {
+                mousePos = { x: e.clientX, y: e.clientY };
+
+                const test_x1_frac = unlerp(0, screen_width, mousePos.x);
+                const test_x2_frac = unlerp(0, screen_width, mousePos.y);
+
+                x1 = lerp(test_x1_min, test_x1_max, test_x1_frac);
+                x2 = lerp(test_x2_min, test_x2_max, test_x2_frac);
+
+                refresh_screen = true;
+            }
+        });
+
+        setInterval(() => {
+            a_of_turn += 0.001;
+            a_of_turn %= 1;
+            refresh_screen_from_timer = true;
+        }, 10);
+
+        draw();
+    </script>
 </body>
 </html>
