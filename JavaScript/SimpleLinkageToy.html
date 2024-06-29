@@ -9,26 +9,41 @@
             margin: 0;
             overflow: hidden;
             background-color: black;
-            color: white; /* Text color for instructions */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
             font-family: Arial, sans-serif;
+            user-select: none; /* Prevent text selection */
+            -webkit-touch-callout: none; /* Disable callout on long press on iOS */
+            -webkit-user-select: none; /* Disable selection on iOS */
+            -moz-user-select: none; /* Disable selection on Firefox */
+            -ms-user-select: none; /* Disable selection on IE/Edge */
+            user-select: none; /* Disable selection */
         }
         canvas {
             display: block;
+            touch-action: none; /* Prevent default touch actions like scroll */
         }
         .overlay {
             position: absolute;
             top: 10px;
             left: 10px;
             padding: 10px;
-            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background for overlay */
+            background-color: rgba(0, 0, 0, 0.5);
             border-radius: 5px;
+            pointer-events: none; /* Allows clicks to go through */
+        }
+        .overlay-content {
+            pointer-events: auto; /* Enable clicks on text content */
         }
         .overlay h1 {
             font-size: 20px;
             margin-bottom: 5px;
         }
         .overlay p {
-            font-size: 11px;
+            font-size: 14px;
             margin: 0;
         }
     </style>
