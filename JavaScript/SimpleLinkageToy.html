@@ -8,14 +8,60 @@
         body {
             margin: 0;
             overflow: hidden;
-            background-color: black; /* Set background color to black */
+            background-color: black;
+            color: white; /* Text color for instructions */
+            font-family: Arial, sans-serif;
         }
         canvas {
             display: block;
         }
+        .overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background for overlay */
+            border-radius: 5px;
+        }
+        .overlay h1 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        .overlay p {
+            font-size: 11px;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
+
+    <div class="overlay">
+        <h1>4-bar Linkage</h1>
+        <p>
+Instructions:<br>
+<br>
+Click and drag on the canvas to interact.<br>
+The coloured lines in the middle (so all except the dark blue line) constitute the bars of two related 4-bar linkages.<br>
+- The first 4-bar linkage consists of bars coloured green, yellow, cyan and red.<br>
+- The second 4-bar linkage consists of bars coloured green, yellow, magenta and white.<br>
+The green bar is of constant position and length which acts as the stationary object to which the mechanism is fixed.<br>
+The yellow bar is driving the mechanism. The angle it makes with the green bar is increasing at a constant rate.<br>
+The remaining bars are in two pairs:<br>
+- The first pair is (cyan, red) and the second pair is (magenta, white).<br>
+- Each pair is one of the two solutions to the problem of where the two remaining bars (of given lengths) must be in order<br>
+    to complete the 4-bar linkage (such that the last bar connects to the other end of the green bar.<br>
+<br>
+  This reduces to the problem of finding a triangle with two fixed length sides where the remaining side must have adjacent vertices<br>
+    at given positions and any such solution may be mirrored about that remaining side and still be a solution, we in general have two<br>
+    solutions and hence the two 4-bar linkages.<br>
+<br>
+  The green dots graph out the two solutions for angle that the last bar makes with the green bar (y-axis with top and bottom of screen<br>
+    being the bar pointing left from its pivot with the green bar) over the angle that the yellow bar makes with the green bar (x-axis where<br>
+    left and right of screen being a yellow bar pointing right from its pivot with the green bar).<br>
+<br>
+The blue vertical line represents the current angle that the yellow bar makes with the green bar.<br>
+</p>
+    </div>
     <canvas id="canvas"></canvas>
     <script>
         const canvas = document.getElementById('canvas');
