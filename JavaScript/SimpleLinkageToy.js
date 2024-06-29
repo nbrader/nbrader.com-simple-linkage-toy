@@ -23,7 +23,7 @@ const plot_frac = screen_width / (2 * pi);
 const test_steps_per_dim = 120;
 const test_circle_width = screen_width / test_steps_per_dim;
 
-let view_test_grid = true;
+let view_test_grid = false;
 const a_pos = { x: 350, y: 500 };
 
 const plot_points = 100;
