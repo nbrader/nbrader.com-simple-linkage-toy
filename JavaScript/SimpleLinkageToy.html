@@ -15,16 +15,15 @@
             height: 100vh;
             color: white;
             font-family: Arial, sans-serif;
-            user-select: none; /* Prevent text selection */
-            -webkit-touch-callout: none; /* Disable callout on long press on iOS */
-            -webkit-user-select: none; /* Disable selection on iOS */
-            -moz-user-select: none; /* Disable selection on Firefox */
-            -ms-user-select: none; /* Disable selection on IE/Edge */
-            user-select: none; /* Disable selection */
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
         canvas {
             display: block;
-            touch-action: none; /* Prevent default touch actions like scroll */
+            touch-action: none;
         }
         .overlay {
             position: absolute;
@@ -33,10 +32,10 @@
             padding: 10px;
             background-color: rgba(0, 0, 0, 0.5);
             border-radius: 5px;
-            pointer-events: none; /* Allows clicks to go through */
+            pointer-events: none;
         }
         .overlay-content {
-            pointer-events: auto; /* Enable clicks on text content */
+            pointer-events: auto;
         }
         .overlay h1 {
             font-size: 20px;
@@ -94,6 +93,7 @@ WARNING: The reason the graphic has been duplicated is because the current versi
 
         const screen_width = 1024;
         const plot_frac = screen_width / (2 * Math.PI);
+        const plot_points = 100;
 
         let x1 = -163.046875;
         let x2 = -283.28125;
@@ -108,8 +108,6 @@ WARNING: The reason the graphic has been duplicated is because the current versi
 
         const a_pos = { x: 350, y: 500 };
 
-        const plot_points = 100;
-
         let mouseDown = false;
         let mousePos = { x: 0, y: 0 };
 
@@ -121,26 +119,17 @@ WARNING: The reason the graphic has been duplicated is because the current versi
             return (t - x0) / (x1 - x0);
         }
 
-        function sqr_distance(v0, v1) {
-            return (v1.x - v0.x) ** 2 + (v1.y - v0.y) ** 2;
-        }
-
         function get_b_angles_1_choice(a, x1, x2, x3, x4, sign_choice) {
             const y_discriminant = x1 ** 2 + x4 ** 2 - 2 * x1 * x4 * Math.cos(a);
             if (y_discriminant > 0) {
-                const y = sign_choice*Math.sqrt(y_discriminant);
+                const y = sign_choice * Math.sqrt(y_discriminant);
                 const b1_arg = (x1 / y) * Math.sin(a);
                 if (b1_arg >= -1 && b1_arg <= 1) {
                     const b1 = Math.asin(b1_arg);
-                    const denom = 2 * x2 * y;
-                    if (denom != 0) {
-                        const b2_arg = (x2 ** 2 + y ** 2 - x3 ** 2) / denom;
-                        if (b2_arg >= -1 && b2_arg <= 1) {
-                            const b2 = Math.acos(b2_arg);
-                            const b_plus = b1 + b2;
-                            const b_minus = b1 - b2;
-                            return [b_plus, b_minus];
-                        }
+                    const b2_arg = (x2 ** 2 + y ** 2 - x3 ** 2) / (2 * x2 * y);
+                    if (b2_arg >= -1 && b2_arg <= 1) {
+                        const b2 = Math.acos(b2_arg);
+                        return [b1 + b2, b1 - b2];
                     }
                 }
             }
@@ -148,7 +137,7 @@ WARNING: The reason the graphic has been duplicated is because the current versi
         }
 
         function get_b_angles_1(a, x1, x2, x3, x4) {
-            return [get_b_angles_1_choice(a, x1, x2, x3, x4, +1), get_b_angles_1_choice(a, x1, x2, x3, x4, -1)];
+            return [get_b_angles_1_choice(a, x1, x2, x3, x4, 1), get_b_angles_1_choice(a, x1, x2, x3, x4, -1)];
         }
 
         function drawLine(color, x0, y0, x1, y1) {
@@ -162,27 +151,25 @@ WARNING: The reason the graphic has been duplicated is because the current versi
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            for (let plot_a_it = 0; plot_a_it < plot_points; plot_a_it++) {
-                const plot_a = lerp(0, 2 * Math.PI, plot_a_it / plot_points);
+            for (let i = 0; i < plot_points; i++) {
+                const plot_a = lerp(0, 2 * Math.PI, i / plot_points);
                 const b_angles_choice = get_b_angles_1(plot_a, x1, x2, x3, x4);
                 b_angles_choice.forEach(b_angles => {
                     if (b_angles) {
                         const [b_plus, b_minus] = b_angles;
-
-                        const a_in_screenspace = Math.round(plot_a * plot_frac);
-                        const b_plus_in_screenspace = Math.round(b_plus * plot_frac + screen_width / 2);
-                        const b_minus_in_screenspace = Math.round(b_minus * plot_frac + screen_width / 2);
+                        const a_screen = Math.round(plot_a * plot_frac);
+                        const b_plus_screen = Math.round(b_plus * plot_frac + screen_width / 2);
+                        const b_minus_screen = Math.round(b_minus * plot_frac + screen_width / 2);
 
                         ctx.fillStyle = 'green';
                         ctx.beginPath();
-                        ctx.arc(a_in_screenspace, b_plus_in_screenspace, 5, 0, 2 * Math.PI);
+                        ctx.arc(a_screen, b_plus_screen, 5, 0, 2 * Math.PI);
                         ctx.fill();
-
                         ctx.beginPath();
-                        ctx.arc(a_in_screenspace, b_minus_in_screenspace, 5, 0, 2 * Math.PI);
+                        ctx.arc(a_screen, b_minus_screen, 5, 0, 2 * Math.PI);
                         ctx.fill();
                     }
-                })
+                });
             }
 
             const b_pos = { x: a_pos.x + x4, y: a_pos.y };
@@ -203,7 +190,7 @@ WARNING: The reason the graphic has been duplicated is because the current versi
                     drawLine('white', b_pos.x, b_pos.y, d_minus_pos.x, d_minus_pos.y);
                     drawLine('magenta', c_pos.x, c_pos.y, d_minus_pos.x, d_minus_pos.y);
                 }
-            })
+            });
 
             drawLine('green', a_pos.x, a_pos.y, b_pos.x, b_pos.y);
             drawLine('yellow', a_pos.x, a_pos.y, c_pos.x, c_pos.y);
@@ -223,19 +210,13 @@ WARNING: The reason the graphic has been duplicated is because the current versi
         canvas.addEventListener('mousemove', (e) => {
             if (mouseDown) {
                 mousePos = { x: e.clientX, y: e.clientY };
-
-                const test_x1_frac = unlerp(0, screen_width, mousePos.x);
-                const test_x2_frac = unlerp(0, screen_width, mousePos.y);
-
-                x1 = lerp(test_x1_min, test_x1_max, test_x1_frac);
-                x2 = lerp(test_x2_min, test_x2_max, test_x2_frac);
+                x1 = lerp(test_x1_min, test_x1_max, unlerp(0, screen_width, mousePos.x));
+                x2 = lerp(test_x2_min, test_x2_max, unlerp(0, screen_width, mousePos.y));
             }
         });
 
         setInterval(() => {
-            a_of_turn += 0.001;
-            a_of_turn %= 1;
-            refresh_screen_from_timer = true;
+            a_of_turn = (a_of_turn + 0.001) % 1;
         }, 10);
 
         draw();
