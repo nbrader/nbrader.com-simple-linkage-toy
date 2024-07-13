@@ -90,7 +90,7 @@ The remaining bars are in two pairs:<br>
 
         const screen_width = 1024;
         const plot_frac = screen_width / (2 * Math.PI);
-        const plot_points = 100;
+        const plot_points = 5000;
 
         let x1 = -163.046875;
         let x2 = -283.28125;
@@ -161,10 +161,10 @@ The remaining bars are in two pairs:<br>
 
                     ctx.fillStyle = 'green';
                     ctx.beginPath();
-                    ctx.arc(a_screen, b_plus_screen, 5, 0, 2 * Math.PI);
+                    ctx.arc(a_screen, b_plus_screen, 2, 0, 2 * Math.PI);
                     ctx.fill();
                     ctx.beginPath();
-                    ctx.arc(a_screen, b_minus_screen, 5, 0, 2 * Math.PI);
+                    ctx.arc(a_screen, b_minus_screen, 2, 0, 2 * Math.PI);
                     ctx.fill();
                 }
             }
