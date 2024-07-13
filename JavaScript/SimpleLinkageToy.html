@@ -77,10 +77,7 @@ The remaining bars are in two pairs:<br>
     being the bar pointing left from its pivot with the green bar) over the angle that the yellow bar makes with the green bar (x-axis where<br>
     left and right of screen being a yellow bar pointing right from its pivot with the green bar).<br>
 <br>
-- The blue vertical line represents the current angle that the yellow bar makes with the green bar.<br>
-<br>
-WARNING: The reason the graphic has been duplicated is because the current version doesn't properly discount one of the answers to the sqrt<br>
-    (instead both are displayed to avoid having to choose).<br>
+- The blue vertical line represents the current angle that the yellow bar makes with the green bar.
 </p>
     </div>
     <canvas id="canvas"></canvas>
@@ -119,7 +116,13 @@ WARNING: The reason the graphic has been duplicated is because the current versi
             return (t - x0) / (x1 - x0);
         }
 
-        function get_b_angles_1_choice(a, x1, x2, x3, x4, sign_choice) {
+        function get_b_angles_1_choice(a, x1, x2, x3, x4, dummy) {
+            sign_choice = 1;
+            if (x1*Math.cos(a) > x4)
+            {
+                sign_choice = -1;
+            }
+            
             const y_discriminant = x1 ** 2 + x4 ** 2 - 2 * x1 * x4 * Math.cos(a);
             if (y_discriminant > 0) {
                 const y = sign_choice * Math.sqrt(y_discriminant);
@@ -129,7 +132,7 @@ WARNING: The reason the graphic has been duplicated is because the current versi
                     const b2_arg = (x2 ** 2 + y ** 2 - x3 ** 2) / (2 * x2 * y);
                     if (b2_arg >= -1 && b2_arg <= 1) {
                         const b2 = Math.acos(b2_arg);
-                        return [b1 + b2, b1 - b2];
+                        return [b1 + sign_choice*b2, b1 - sign_choice*b2];
                     }
                 }
             }
