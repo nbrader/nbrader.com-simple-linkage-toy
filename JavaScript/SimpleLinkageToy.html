@@ -132,13 +132,17 @@ The remaining bars are in two pairs:<br>
                     const b2_arg = (x2 ** 2 + y ** 2 - x3 ** 2) / (2 * x2 * y);
                     if (b2_arg >= -1 && b2_arg <= 1) {
                         const b2 = Math.acos(b2_arg);
-                        return [b1 + sign_choice*b2, b1 - sign_choice*b2];
+                        return [mod(b1 + sign_choice*b2, 2*Math.PI), mod(b1 - sign_choice*b2, 2*Math.PI)];
                     }
                 }
             }
             return null;
         }
-
+        
+        function mod(n, d) {
+            return ((n % d) + d) % d;
+        }
+        
         function drawLine(color, x0, y0, x1, y1) {
             ctx.strokeStyle = color;
             ctx.beginPath();
@@ -156,8 +160,8 @@ The remaining bars are in two pairs:<br>
                 if (b_angles) {
                     const [b_plus, b_minus] = b_angles;
                     const a_screen = Math.round(plot_a * plot_frac);
-                    const b_plus_screen = Math.round(b_plus * plot_frac + screen_width / 2);
-                    const b_minus_screen = Math.round(b_minus * plot_frac + screen_width / 2);
+                    const b_plus_screen = Math.round(b_plus * plot_frac);
+                    const b_minus_screen = Math.round(b_minus * plot_frac);
 
                     ctx.fillStyle = 'green';
                     ctx.beginPath();
