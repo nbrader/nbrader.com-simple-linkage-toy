@@ -116,7 +116,7 @@ The remaining bars are in two pairs:<br>
             return (t - x0) / (x1 - x0);
         }
 
-        function get_b_angles_1_choice(a, x1, x2, x3, x4, dummy) {
+        function get_b_angles_1(a, x1, x2, x3, x4) {
             sign_choice = 1;
             if (x1*Math.cos(a) > x4)
             {
@@ -139,10 +139,6 @@ The remaining bars are in two pairs:<br>
             return null;
         }
 
-        function get_b_angles_1(a, x1, x2, x3, x4) {
-            return [get_b_angles_1_choice(a, x1, x2, x3, x4, 1), get_b_angles_1_choice(a, x1, x2, x3, x4, -1)];
-        }
-
         function drawLine(color, x0, y0, x1, y1) {
             ctx.strokeStyle = color;
             ctx.beginPath();
@@ -156,23 +152,21 @@ The remaining bars are in two pairs:<br>
             
             for (let i = 0; i < plot_points; i++) {
                 const plot_a = lerp(0, 2 * Math.PI, i / plot_points);
-                const b_angles_choice = get_b_angles_1(plot_a, x1, x2, x3, x4);
-                b_angles_choice.forEach(b_angles => {
-                    if (b_angles) {
-                        const [b_plus, b_minus] = b_angles;
-                        const a_screen = Math.round(plot_a * plot_frac);
-                        const b_plus_screen = Math.round(b_plus * plot_frac + screen_width / 2);
-                        const b_minus_screen = Math.round(b_minus * plot_frac + screen_width / 2);
+                const b_angles = get_b_angles_1(plot_a, x1, x2, x3, x4);
+                if (b_angles) {
+                    const [b_plus, b_minus] = b_angles;
+                    const a_screen = Math.round(plot_a * plot_frac);
+                    const b_plus_screen = Math.round(b_plus * plot_frac + screen_width / 2);
+                    const b_minus_screen = Math.round(b_minus * plot_frac + screen_width / 2);
 
-                        ctx.fillStyle = 'green';
-                        ctx.beginPath();
-                        ctx.arc(a_screen, b_plus_screen, 5, 0, 2 * Math.PI);
-                        ctx.fill();
-                        ctx.beginPath();
-                        ctx.arc(a_screen, b_minus_screen, 5, 0, 2 * Math.PI);
-                        ctx.fill();
-                    }
-                });
+                    ctx.fillStyle = 'green';
+                    ctx.beginPath();
+                    ctx.arc(a_screen, b_plus_screen, 5, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(a_screen, b_minus_screen, 5, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
             }
 
             const b_pos = { x: a_pos.x + x4, y: a_pos.y };
@@ -181,19 +175,17 @@ The remaining bars are in two pairs:<br>
 
             drawLine('blue', a_of_turn * screen_width, 0, a_of_turn * screen_width, screen_width);
 
-            const b_angles_choice = get_b_angles_1(a, x1, x2, x3, x4);
-            b_angles_choice.forEach(b_angles => {
-                if (b_angles) {
-                    const [b_plus, b_minus] = b_angles;
-                    const d_plus_pos = { x: b_pos.x + x2 * Math.cos(Math.PI - b_plus), y: b_pos.y + x2 * Math.sin(Math.PI - b_plus) };
-                    const d_minus_pos = { x: b_pos.x + x2 * Math.cos(Math.PI - b_minus), y: b_pos.y + x2 * Math.sin(Math.PI - b_minus) };
+            const b_angles = get_b_angles_1(a, x1, x2, x3, x4);
+            if (b_angles) {
+                const [b_plus, b_minus] = b_angles;
+                const d_plus_pos = { x: b_pos.x + x2 * Math.cos(Math.PI - b_plus), y: b_pos.y + x2 * Math.sin(Math.PI - b_plus) };
+                const d_minus_pos = { x: b_pos.x + x2 * Math.cos(Math.PI - b_minus), y: b_pos.y + x2 * Math.sin(Math.PI - b_minus) };
 
-                    drawLine('red', b_pos.x, b_pos.y, d_plus_pos.x, d_plus_pos.y);
-                    drawLine('cyan', c_pos.x, c_pos.y, d_plus_pos.x, d_plus_pos.y);
-                    drawLine('white', b_pos.x, b_pos.y, d_minus_pos.x, d_minus_pos.y);
-                    drawLine('magenta', c_pos.x, c_pos.y, d_minus_pos.x, d_minus_pos.y);
-                }
-            });
+                drawLine('red', b_pos.x, b_pos.y, d_plus_pos.x, d_plus_pos.y);
+                drawLine('cyan', c_pos.x, c_pos.y, d_plus_pos.x, d_plus_pos.y);
+                drawLine('white', b_pos.x, b_pos.y, d_minus_pos.x, d_minus_pos.y);
+                drawLine('magenta', c_pos.x, c_pos.y, d_minus_pos.x, d_minus_pos.y);
+            }
 
             drawLine('green', a_pos.x, a_pos.y, b_pos.x, b_pos.y);
             drawLine('yellow', a_pos.x, a_pos.y, c_pos.x, c_pos.y);
