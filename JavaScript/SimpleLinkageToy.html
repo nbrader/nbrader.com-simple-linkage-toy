@@ -128,6 +128,10 @@
 
         const container = document.querySelector('.container');
 
+        let offsetX = 0;
+        let offsetY = 0;
+        let scale = 1;
+
         function resizeCanvases() {
             const containerWidth = container.clientWidth;
             const containerHeight = container.clientHeight;
@@ -162,6 +166,7 @@
 
         let mouseDown = false;
         let mousePos = { x: 0, y: 0 };
+        let lastMousePos = { x: 0, y: 0 };
 
         let sliders = {
             x1: document.getElementById('slider-x1'),
@@ -200,8 +205,8 @@
             return null;
         }
 
-        function mod(n, d) {
-            return ((n % d) + d) % d;
+        function mod(n, m) {
+            return ((n % m) + m) % m;
         }
 
         function drawLine(ctx, color, x0, y0, x1, y1) {
@@ -214,6 +219,10 @@
 
         function drawLinkage() {
             linkageCtx.clearRect(0, 0, linkageCanvas.width, linkageCanvas.height);
+            linkageCtx.save();
+            linkageCtx.translate(offsetX, offsetY);
+            linkageCtx.scale(scale, scale);
+
             const b_pos = { x: a_pos.x + x4, y: a_pos.y };
             const a = 2 * Math.PI * a_of_turn;
             const c_pos = { x: a_pos.x + x1 * Math.cos(a), y: a_pos.y + x1 * Math.sin(a) };
@@ -232,6 +241,8 @@
 
             drawLine(linkageCtx, 'green', a_pos.x, a_pos.y, b_pos.x, b_pos.y);
             drawLine(linkageCtx, 'yellow', a_pos.x, a_pos.y, c_pos.x, c_pos.y);
+
+            linkageCtx.restore();
 
             requestAnimationFrame(drawLinkage);
         }
@@ -252,10 +263,10 @@
 
                     graphCtx.fillStyle = 'green';
                     graphCtx.beginPath();
-                    graphCtx.arc(a_screen, b_plus_screen, 0.002*graphSize, 0, 2 * Math.PI);
+                    graphCtx.arc(a_screen, b_plus_screen, 2, 0, 2 * Math.PI);
                     graphCtx.fill();
                     graphCtx.beginPath();
-                    graphCtx.arc(a_screen, b_minus_screen, 0.002*graphSize, 0, 2 * Math.PI);
+                    graphCtx.arc(a_screen, b_minus_screen, 2, 0, 2 * Math.PI);
                     graphCtx.fill();
                 }
             }
@@ -268,7 +279,7 @@
 
         linkageCanvas.addEventListener('mousedown', (e) => {
             mouseDown = true;
-            mousePos = { x: e.clientX, y: e.clientY };
+            lastMousePos = { x: e.clientX, y: e.clientY };
         });
 
         linkageCanvas.addEventListener('mouseup', () => {
@@ -277,10 +288,24 @@
 
         linkageCanvas.addEventListener('mousemove', (e) => {
             if (mouseDown) {
-                mousePos = { x: e.clientX, y: e.clientY };
-                x1 = lerp(test_x1_min, test_x1_max, unlerp(0, linkageCanvas.width, mousePos.x));
-                x2 = lerp(test_x2_min, test_x2_max, unlerp(0, linkageCanvas.height, mousePos.y));
+                const dx = e.clientX - lastMousePos.x;
+                const dy = e.clientY - lastMousePos.y;
+                offsetX += dx;
+                offsetY += dy;
+                lastMousePos = { x: e.clientX, y: e.clientY };
             }
+        });
+
+        linkageCanvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoom = e.deltaY > 0 ? 0.9 : 1.1;
+            scale *= zoom;
+
+            const mouseX = e.clientX - linkageCanvas.getBoundingClientRect().left;
+            const mouseY = e.clientY - linkageCanvas.getBoundingClientRect().top;
+
+            offsetX -= mouseX / scale * (zoom - 1);
+            offsetY -= mouseY / scale * (zoom - 1);
         });
 
         let sliderMouseDown = {
