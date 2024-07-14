@@ -127,12 +127,23 @@
         const graphCtx = graphCanvas.getContext('2d');
 
         const container = document.querySelector('.container');
-        linkageCanvas.width = container.clientWidth / 2;
-        linkageCanvas.height = container.clientHeight / 2;
 
-        let graphSize = Math.min(container.clientWidth / 2, container.clientHeight / 2);
-        graphCanvas.width = graphSize;
-        graphCanvas.height = graphSize;
+        function resizeCanvases() {
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+            const quadrantWidth = containerWidth / 2;
+            const quadrantHeight = containerHeight / 2;
+
+            linkageCanvas.width = quadrantWidth;
+            linkageCanvas.height = quadrantHeight;
+
+            const graphSize = Math.min(quadrantWidth, quadrantHeight);
+            graphCanvas.width = graphSize;
+            graphCanvas.height = graphSize;
+        }
+
+        resizeCanvases();
+        window.addEventListener('resize', resizeCanvases);
 
         const plot_points = 5000;
 
@@ -203,7 +214,6 @@
 
         function drawLinkage() {
             linkageCtx.clearRect(0, 0, linkageCanvas.width, linkageCanvas.height);
-
             const b_pos = { x: a_pos.x + x4, y: a_pos.y };
             const a = 2 * Math.PI * a_of_turn;
             const c_pos = { x: a_pos.x + x1 * Math.cos(a), y: a_pos.y + x1 * Math.sin(a) };
@@ -228,6 +238,8 @@
 
         function drawGraph() {
             graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+
+            const graphSize = graphCanvas.width;
 
             for (let i = 0; i < plot_points; i++) {
                 const plot_a = lerp(0, 2 * Math.PI, i / plot_points);
