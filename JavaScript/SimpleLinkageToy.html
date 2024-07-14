@@ -129,15 +129,15 @@
         const container = document.querySelector('.container');
         linkageCanvas.width = container.clientWidth / 2;
         linkageCanvas.height = container.clientHeight / 2;
-        graphCanvas.width = container.clientWidth / 2;
-        graphCanvas.height = container.clientHeight / 2;
 
-        const screen_width = graphCanvas.width;
-        const screen_height = graphCanvas.height;
+        let graphSize = Math.min(container.clientWidth / 2, container.clientHeight / 2);
+        graphCanvas.width = graphSize;
+        graphCanvas.height = graphSize;
+
         const plot_points = 5000;
 
-        let x1 = 163.046875;
-        let x2 = 283.28125;
+        let x1 = -163.046875;
+        let x2 = -283.28125;
         let x3 = 410;
         let x4 = 300;
         let a_of_turn = 0.25;
@@ -168,7 +168,7 @@
         }
 
         function get_b_angles_1(a, x1, x2, x3, x4) {
-            let sign_choice = 1;
+            sign_choice = 1;
             if (x1 * Math.cos(a) > x4) {
                 sign_choice = -1;
             }
@@ -234,9 +234,9 @@
                 const b_angles = get_b_angles_1(plot_a, x1, x2, x3, x4);
                 if (b_angles) {
                     const [b_plus, b_minus] = b_angles;
-                    const a_screen = Math.round(plot_a * (graphCanvas.width - 1) / (2 * Math.PI));
-                    const b_plus_screen = Math.round(b_plus * (graphCanvas.height - 1) / (2 * Math.PI));
-                    const b_minus_screen = Math.round(b_minus * (graphCanvas.height - 1) / (2 * Math.PI));
+                    const a_screen = Math.round(plot_a * (graphSize / (2 * Math.PI)));
+                    const b_plus_screen = Math.round(b_plus * (graphSize / (2 * Math.PI)));
+                    const b_minus_screen = Math.round(b_minus * (graphSize / (2 * Math.PI)));
 
                     graphCtx.fillStyle = 'green';
                     graphCtx.beginPath();
@@ -248,8 +248,8 @@
                 }
             }
 
-            const blueLineX = Math.round(a_of_turn * (graphCanvas.width - 1));
-            drawLine(graphCtx, 'blue', blueLineX, 0, blueLineX, graphCanvas.height);
+            const blueLineX = Math.round(a_of_turn * graphSize);
+            drawLine(graphCtx, 'blue', blueLineX, 0, blueLineX, graphSize);
 
             requestAnimationFrame(drawGraph);
         }
