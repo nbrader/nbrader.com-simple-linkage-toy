@@ -21,92 +21,144 @@
             -moz-user-select: none;
             -ms-user-select: none;
         }
-        canvas {
-            display: block;
-            touch-action: none;
-        }
-        .overlay {
+        .container {
+            display: grid;
+            grid-template-columns: 50% 50%;
+            grid-template-rows: 50% 50%;
+            width: 100%;
+            height: 100%;
             position: absolute;
-            top: 10px;
-            left: 10px;
+        }
+        .instructions {
             padding: 10px;
             background-color: rgba(0, 0, 0, 0.5);
             border-radius: 5px;
-            pointer-events: none;
+            overflow-y: auto;
         }
-        .overlay-content {
-            pointer-events: auto;
+        .ui-elements {
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
         }
-        .overlay h1 {
-            font-size: 20px;
-            margin-bottom: 5px;
+        .canvas-container {
+            position: relative;
+            overflow: hidden;
         }
-        .overlay p {
-            font-size: 14px;
-            margin: 0;
+        canvas {
+            display: block;
+            touch-action: none;
+            position: absolute;
+        }
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .slider {
+            width: 80%;
+            margin: 10px 0;
         }
     </style>
 </head>
 <body>
-
-    <div class="overlay">
-        <h1>4-bar Linkage</h1>
-        <p>
-Instructions:<br>
-<br>
-Click and drag on the canvas to interact.<br>
-- Clicking further right from the centre makes the yellow bar longer.<br>
-- Clicking further left from the centre makes the yellow bar longer but in the opposite direction.<br>
-- Clicking further up from the centre makes the last bars longer.<br>
-- Clicking further down from the centre makes the last bars longer but in the opposite direction.<br>
-The coloured lines in the middle (so all except the dark blue line) constitute the bars of two related 4-bar linkages.<br>
-- The first 4-bar linkage consists of bars coloured green, yellow, cyan and red.<br>
-- The second 4-bar linkage consists of bars coloured green, yellow, magenta and white.<br>
-The green bar is of constant position and length which acts as the stationary object to which the mechanism is fixed.<br>
-The yellow bar is driving the mechanism. The angle it makes with the green bar is increasing at a constant rate.<br>
-The remaining bars are in two pairs:<br>
-- The first pair is (cyan, red) and the second pair is (magenta, white).<br>
-- Each pair is one of the two solutions to the problem of where the two remaining bars (of given lengths) must be in order<br>
-    to complete the 4-bar linkage (such that the last bar connects to the other end of the green bar.<br>
-<br>
-  This reduces to the problem of finding a triangle with two fixed length sides where the remaining side must have adjacent vertices<br>
-    at given positions and any such solution may be mirrored about that remaining side and still be a solution, we in general have two<br>
-    solutions and hence the two 4-bar linkages.<br>
-<br>
-  The green dots graph out the two solutions for angle that the last bar makes with the green bar (y-axis with top and bottom of screen<br>
-    being the bar pointing left from its pivot with the green bar) over the angle that the yellow bar makes with the green bar (x-axis where<br>
-    left and right of screen being a yellow bar pointing right from its pivot with the green bar).<br>
-<br>
-- The blue vertical line represents the current angle that the yellow bar makes with the green bar.
-</p>
+    <div class="container">
+        <div class="instructions">
+            <h1>4-bar Linkage</h1>
+            <p>
+                Instructions:<br>
+                <br>
+                Click and drag on the canvas to interact.<br>
+                - Clicking further right from the centre makes the yellow bar longer.<br>
+                - Clicking further left from the centre makes the yellow bar longer but in the opposite direction.<br>
+                - Clicking further up from the centre makes the last bars longer.<br>
+                - Clicking further down from the centre makes the last bars longer but in the opposite direction.<br>
+                The coloured lines in the middle (so all except the dark blue line) constitute the bars of two related 4-bar linkages.<br>
+                - The first 4-bar linkage consists of bars coloured green, yellow, cyan and red.<br>
+                - The second 4-bar linkage consists of bars coloured green, yellow, magenta and white.<br>
+                The green bar is of constant position and length which acts as the stationary object to which the mechanism is fixed.<br>
+                The yellow bar is driving the mechanism. The angle it makes with the green bar is increasing at a constant rate.<br>
+                The remaining bars are in two pairs:<br>
+                - The first pair is (cyan, red) and the second pair is (magenta, white).<br>
+                - Each pair is one of the two solutions to the problem of where the two remaining bars (of given lengths) must be in order<br>
+                to complete the 4-bar linkage (such that the last bar connects to the other end of the green bar.<br>
+                <br>
+                This reduces to the problem of finding a triangle with two fixed length sides where the remaining side must have adjacent vertices<br>
+                at given positions and any such solution may be mirrored about that remaining side and still be a solution, we in general have two<br>
+                solutions and hence the two 4-bar linkages.<br>
+                <br>
+                The green dots graph out the two solutions for angle that the last bar makes with the green bar (y-axis with top and bottom of screen<br>
+                being the bar pointing left from its pivot with the green bar) over the angle that the yellow bar makes with the green bar (x-axis where<br>
+                left and right of screen being a yellow bar pointing right from its pivot with the green bar).<br>
+                <br>
+                - The blue vertical line represents the current angle that the yellow bar makes with the green bar.
+            </p>
+        </div>
+        <div class="ui-elements">
+            <div class="slider-container">
+                <div>
+                    <label for="slider-x1">x1</label>
+                    <input type="range" id="slider-x1" class="slider" min="-100" max="100" value="0">
+                </div>
+                <div>
+                    <label for="slider-x2">x2</label>
+                    <input type="range" id="slider-x2" class="slider" min="-100" max="100" value="0">
+                </div>
+                <div>
+                    <label for="slider-x3">x3</label>
+                    <input type="range" id="slider-x3" class="slider" min="-100" max="100" value="0">
+                </div>
+                <div>
+                    <label for="slider-x4">x4</label>
+                    <input type="range" id="slider-x4" class="slider" min="-100" max="100" value="0">
+                </div>
+            </div>
+        </div>
+        <div class="canvas-container">
+            <canvas id="linkage-canvas"></canvas>
+        </div>
+        <div class="canvas-container">
+            <canvas id="graph-canvas"></canvas>
+        </div>
     </div>
-    <canvas id="canvas"></canvas>
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
+        const linkageCanvas = document.getElementById('linkage-canvas');
+        const linkageCtx = linkageCanvas.getContext('2d');
+        const graphCanvas = document.getElementById('graph-canvas');
+        const graphCtx = graphCanvas.getContext('2d');
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        const container = document.querySelector('.container');
+        linkageCanvas.width = container.clientWidth / 2;
+        linkageCanvas.height = container.clientHeight / 2;
+        graphCanvas.width = container.clientWidth / 2;
+        graphCanvas.height = container.clientHeight / 2;
 
-        const screen_width = 1024;
+        const screen_width = graphCanvas.width;
+        const screen_height = graphCanvas.height;
         const plot_frac = screen_width / (2 * Math.PI);
         const plot_points = 5000;
 
-        let x1 = -163.046875;
-        let x2 = -283.28125;
+        let x1 = 163.046875;
+        let x2 = 283.28125;
         let x3 = 410;
         let x4 = 300;
         let a_of_turn = 0.25;
 
-        const test_x1_min = -500;
-        const test_x1_max = 500;
-        const test_x2_min = -500;
-        const test_x2_max = 500;
+        const test_x1_min = -4000;
+        const test_x1_max = 4000;
+        const test_x2_min = -4000;
+        const test_x2_max = 4000;
 
-        const a_pos = { x: 350, y: 500 };
+        const a_pos = { x: linkageCanvas.width / 2, y: linkageCanvas.height / 2 };
 
         let mouseDown = false;
         let mousePos = { x: 0, y: 0 };
+
+        let sliders = {
+            x1: document.getElementById('slider-x1'),
+            x2: document.getElementById('slider-x2'),
+            x3: document.getElementById('slider-x3'),
+            x4: document.getElementById('slider-x4')
+        };
 
         function lerp(x0, x1, t) {
             return x0 * (1 - t) + x1 * t;
@@ -118,11 +170,10 @@ The remaining bars are in two pairs:<br>
 
         function get_b_angles_1(a, x1, x2, x3, x4) {
             sign_choice = 1;
-            if (x1*Math.cos(a) > x4)
-            {
+            if (x1 * Math.cos(a) > x4) {
                 sign_choice = -1;
             }
-            
+
             const y_discriminant = x1 ** 2 + x4 ** 2 - 2 * x1 * x4 * Math.cos(a);
             if (y_discriminant > 0) {
                 const y = sign_choice * Math.sqrt(y_discriminant);
@@ -132,18 +183,18 @@ The remaining bars are in two pairs:<br>
                     const b2_arg = (x2 ** 2 + y ** 2 - x3 ** 2) / (2 * x2 * y);
                     if (b2_arg >= -1 && b2_arg <= 1) {
                         const b2 = Math.acos(b2_arg);
-                        return [mod(b1 + sign_choice*b2, 2*Math.PI), mod(b1 - sign_choice*b2, 2*Math.PI)];
+                        return [mod(b1 + sign_choice * b2, 2 * Math.PI), mod(b1 - sign_choice * b2, 2 * Math.PI)];
                     }
                 }
             }
             return null;
         }
-        
+
         function mod(n, d) {
             return ((n % d) + d) % d;
         }
-        
-        function drawLine(color, x0, y0, x1, y1) {
+
+        function drawLine(ctx, color, x0, y0, x1, y1) {
             ctx.strokeStyle = color;
             ctx.beginPath();
             ctx.moveTo(x0, y0);
@@ -151,9 +202,34 @@ The remaining bars are in two pairs:<br>
             ctx.stroke();
         }
 
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+        function drawLinkage() {
+            linkageCtx.clearRect(0, 0, linkageCanvas.width, linkageCanvas.height);
+
+            const b_pos = { x: a_pos.x + x4, y: a_pos.y };
+            const a = 2 * Math.PI * a_of_turn;
+            const c_pos = { x: a_pos.x + x1 * Math.cos(a), y: a_pos.y + x1 * Math.sin(a) };
+
+            const b_angles = get_b_angles_1(a, x1, x2, x3, x4);
+            if (b_angles) {
+                const [b_plus, b_minus] = b_angles;
+                const d_plus_pos = { x: b_pos.x + x2 * Math.cos(Math.PI - b_plus), y: b_pos.y + x2 * Math.sin(Math.PI - b_plus) };
+                const d_minus_pos = { x: b_pos.x + x2 * Math.cos(Math.PI - b_minus), y: b_pos.y + x2 * Math.sin(Math.PI - b_minus) };
+
+                drawLine(linkageCtx, 'red', b_pos.x, b_pos.y, d_plus_pos.x, d_plus_pos.y);
+                drawLine(linkageCtx, 'cyan', c_pos.x, c_pos.y, d_plus_pos.x, d_plus_pos.y);
+                drawLine(linkageCtx, 'white', b_pos.x, b_pos.y, d_minus_pos.x, d_minus_pos.y);
+                drawLine(linkageCtx, 'magenta', c_pos.x, c_pos.y, d_minus_pos.x, d_minus_pos.y);
+            }
+
+            drawLine(linkageCtx, 'green', a_pos.x, a_pos.y, b_pos.x, b_pos.y);
+            drawLine(linkageCtx, 'yellow', a_pos.x, a_pos.y, c_pos.x, c_pos.y);
+
+            requestAnimationFrame(drawLinkage);
+        }
+
+        function drawGraph() {
+            graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+
             for (let i = 0; i < plot_points; i++) {
                 const plot_a = lerp(0, 2 * Math.PI, i / plot_points);
                 const b_angles = get_b_angles_1(plot_a, x1, x2, x3, x4);
@@ -163,62 +239,80 @@ The remaining bars are in two pairs:<br>
                     const b_plus_screen = Math.round(b_plus * plot_frac);
                     const b_minus_screen = Math.round(b_minus * plot_frac);
 
-                    ctx.fillStyle = 'green';
-                    ctx.beginPath();
-                    ctx.arc(a_screen, b_plus_screen, 2, 0, 2 * Math.PI);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.arc(a_screen, b_minus_screen, 2, 0, 2 * Math.PI);
-                    ctx.fill();
+                    graphCtx.fillStyle = 'green';
+                    graphCtx.beginPath();
+                    graphCtx.arc(a_screen, b_plus_screen, 2, 0, 2 * Math.PI);
+                    graphCtx.fill();
+                    graphCtx.beginPath();
+                    graphCtx.arc(a_screen, b_minus_screen, 2, 0, 2 * Math.PI);
+                    graphCtx.fill();
                 }
             }
 
-            const b_pos = { x: a_pos.x + x4, y: a_pos.y };
-            const a = 2 * Math.PI * a_of_turn;
-            const c_pos = { x: a_pos.x + x1 * Math.cos(a), y: a_pos.y + x1 * Math.sin(a) };
+            const blueLineX = Math.round(a_of_turn * screen_width);
+            drawLine(graphCtx, 'blue', blueLineX, 0, blueLineX, screen_height);
 
-            drawLine('blue', a_of_turn * screen_width, 0, a_of_turn * screen_width, screen_width);
-
-            const b_angles = get_b_angles_1(a, x1, x2, x3, x4);
-            if (b_angles) {
-                const [b_plus, b_minus] = b_angles;
-                const d_plus_pos = { x: b_pos.x + x2 * Math.cos(Math.PI - b_plus), y: b_pos.y + x2 * Math.sin(Math.PI - b_plus) };
-                const d_minus_pos = { x: b_pos.x + x2 * Math.cos(Math.PI - b_minus), y: b_pos.y + x2 * Math.sin(Math.PI - b_minus) };
-
-                drawLine('red', b_pos.x, b_pos.y, d_plus_pos.x, d_plus_pos.y);
-                drawLine('cyan', c_pos.x, c_pos.y, d_plus_pos.x, d_plus_pos.y);
-                drawLine('white', b_pos.x, b_pos.y, d_minus_pos.x, d_minus_pos.y);
-                drawLine('magenta', c_pos.x, c_pos.y, d_minus_pos.x, d_minus_pos.y);
-            }
-
-            drawLine('green', a_pos.x, a_pos.y, b_pos.x, b_pos.y);
-            drawLine('yellow', a_pos.x, a_pos.y, c_pos.x, c_pos.y);
-
-            requestAnimationFrame(draw);
+            requestAnimationFrame(drawGraph);
         }
 
-        canvas.addEventListener('mousedown', (e) => {
+        linkageCanvas.addEventListener('mousedown', (e) => {
             mouseDown = true;
             mousePos = { x: e.clientX, y: e.clientY };
         });
 
-        canvas.addEventListener('mouseup', () => {
+        linkageCanvas.addEventListener('mouseup', () => {
             mouseDown = false;
         });
 
-        canvas.addEventListener('mousemove', (e) => {
+        linkageCanvas.addEventListener('mousemove', (e) => {
             if (mouseDown) {
                 mousePos = { x: e.clientX, y: e.clientY };
-                x1 = lerp(test_x1_min, test_x1_max, unlerp(0, screen_width, mousePos.x));
-                x2 = lerp(test_x2_min, test_x2_max, unlerp(0, screen_width, mousePos.y));
+                x1 = lerp(test_x1_min, test_x1_max, unlerp(0, linkageCanvas.width, mousePos.x));
+                x2 = lerp(test_x2_min, test_x2_max, unlerp(0, linkageCanvas.height, mousePos.y));
             }
+        });
+
+        let sliderMouseDown = {
+            x1: false,
+            x2: false,
+            x3: false,
+            x4: false
+        };
+
+        function updateSliders() {
+            if (sliderMouseDown.x1) x1 += parseFloat(sliders.x1.value) / 100;
+            if (sliderMouseDown.x2) x2 += parseFloat(sliders.x2.value) / 100;
+            if (sliderMouseDown.x3) x3 += parseFloat(sliders.x3.value) / 100;
+            if (sliderMouseDown.x4) x4 += parseFloat(sliders.x4.value) / 100;
+        }
+
+        function resetSliders() {
+            if (!sliderMouseDown.x1) sliders.x1.value = 0;
+            if (!sliderMouseDown.x2) sliders.x2.value = 0;
+            if (!sliderMouseDown.x3) sliders.x3.value = 0;
+            if (!sliderMouseDown.x4) sliders.x4.value = 0;
+        }
+
+        sliders.x1.addEventListener('mousedown', () => sliderMouseDown.x1 = true);
+        sliders.x2.addEventListener('mousedown', () => sliderMouseDown.x2 = true);
+        sliders.x3.addEventListener('mousedown', () => sliderMouseDown.x3 = true);
+        sliders.x4.addEventListener('mousedown', () => sliderMouseDown.x4 = true);
+
+        document.addEventListener('mouseup', () => {
+            sliderMouseDown.x1 = false;
+            sliderMouseDown.x2 = false;
+            sliderMouseDown.x3 = false;
+            sliderMouseDown.x4 = false;
+            resetSliders();
         });
 
         setInterval(() => {
             a_of_turn = (a_of_turn + 0.001) % 1;
+            updateSliders();
         }, 10);
 
-        draw();
+        drawLinkage();
+        drawGraph();
     </script>
 </body>
 </html>
