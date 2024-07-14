@@ -1,0 +1,11 @@
+Bugs:
+-It doesn't handle zooming the page well.
+-Clicking on linkage graph still sets bar lengths but badly.
+-Things aren't named well in code.
+
+Enhancements:
+-Mark boundaries of canvases with lines
+-Show axes on graphs
+-Give graphs zoom and pan with scroll wheel and left click+drag
+-Show at least 2 length graphs (xy and xz graphs which you can click within to select a linkage and have the current linkage displayed as a point on this graph as well as the regions as is done in findings (tidy).png
+-Make bar lengths enter-able in text boxes (which updates when value is changes by other parts of the app)
