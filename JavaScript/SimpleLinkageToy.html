@@ -95,14 +95,22 @@
         </div>
         <div class="ui-elements">
             <div class="slider-container">
-                <label for="slider-x1">X1</label>
-                <input type="range" id="slider-x1" class="slider" min="-100" max="100" value="0">
-                <label for="slider-x2">X2</label>
-                <input type="range" id="slider-x2" class="slider" min="-100" max="100" value="0">
-                <label for="slider-x3">X3</label>
-                <input type="range" id="slider-x3" class="slider" min="-100" max="100" value="0">
-                <label for="slider-x4">X4</label>
-                <input type="range" id="slider-x4" class="slider" min="-100" max="100" value="0">
+                <div>
+                    <label for="slider-x1">x1</label>
+                    <input type="range" id="slider-x1" class="slider" min="-100" max="100" value="0">
+                </div>
+                <div>
+                    <label for="slider-x2">x2</label>
+                    <input type="range" id="slider-x2" class="slider" min="-100" max="100" value="0">
+                </div>
+                <div>
+                    <label for="slider-x3">x3</label>
+                    <input type="range" id="slider-x3" class="slider" min="-100" max="100" value="0">
+                </div>
+                <div>
+                    <label for="slider-x4">x4</label>
+                    <input type="range" id="slider-x4" class="slider" min="-100" max="100" value="0">
+                </div>
             </div>
         </div>
         <div class="canvas-container">
@@ -118,25 +126,49 @@
         const graphCanvas = document.getElementById('graph-canvas');
         const graphCtx = graphCanvas.getContext('2d');
 
+        const container = document.querySelector('.container');
+
+        let offsetX = 0;
+        let offsetY = 0;
+        let scale = 1;
+
+        function resizeCanvases() {
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+            const quadrantWidth = containerWidth / 2;
+            const quadrantHeight = containerHeight / 2;
+
+            linkageCanvas.width = quadrantWidth;
+            linkageCanvas.height = quadrantHeight;
+
+            const graphSize = Math.min(quadrantWidth, quadrantHeight);
+            graphCanvas.width = graphSize;
+            graphCanvas.height = graphSize;
+        }
+
+        resizeCanvases();
+        window.addEventListener('resize', resizeCanvases);
+
+        const plot_points = 5000;
+
         let x1 = -163.046875;
         let x2 = -283.28125;
         let x3 = 410;
         let x4 = 300;
         let a_of_turn = 0.25;
-        const plot_points = 5000;
 
         const test_x1_min = -4000;
         const test_x1_max = 4000;
         const test_x2_min = -4000;
         const test_x2_max = 4000;
 
-        let a_pos = { x: linkageCanvas.width / 2, y: linkageCanvas.height / 2 };
-        let scale = 1;
+        const a_pos = { x: linkageCanvas.width / 2, y: linkageCanvas.height / 2 };
+
         let mouseDown = false;
         let mousePos = { x: 0, y: 0 };
-        let panStart = { x: 0, y: 0 };
+        let lastMousePos = { x: 0, y: 0 };
 
-        const sliders = {
+        let sliders = {
             x1: document.getElementById('slider-x1'),
             x2: document.getElementById('slider-x2'),
             x3: document.getElementById('slider-x3'),
@@ -151,12 +183,8 @@
             return (t - x0) / (x1 - x0);
         }
 
-        function mod(n, d) {
-            return ((n % d) + d) % d;
-        }
-
         function get_b_angles_1(a, x1, x2, x3, x4) {
-            let sign_choice = 1;
+            sign_choice = 1;
             if (x1 * Math.cos(a) > x4) {
                 sign_choice = -1;
             }
@@ -177,6 +205,10 @@
             return null;
         }
 
+        function mod(n, m) {
+            return ((n % m) + m) % m;
+        }
+
         function drawLine(ctx, color, x0, y0, x1, y1) {
             ctx.strokeStyle = color;
             ctx.beginPath();
@@ -188,9 +220,8 @@
         function drawLinkage() {
             linkageCtx.clearRect(0, 0, linkageCanvas.width, linkageCanvas.height);
             linkageCtx.save();
-            linkageCtx.translate(a_pos.x, a_pos.y);
+            linkageCtx.translate(offsetX, offsetY);
             linkageCtx.scale(scale, scale);
-            linkageCtx.translate(-a_pos.x, -a_pos.y);
 
             const b_pos = { x: a_pos.x + x4, y: a_pos.y };
             const a = 2 * Math.PI * a_of_turn;
@@ -212,18 +243,14 @@
             drawLine(linkageCtx, 'yellow', a_pos.x, a_pos.y, c_pos.x, c_pos.y);
 
             linkageCtx.restore();
+
             requestAnimationFrame(drawLinkage);
         }
 
         function drawGraph() {
-            const quadrantWidth = graphCanvas.parentElement.clientWidth;
-            const quadrantHeight = graphCanvas.parentElement.clientHeight;
-            const graphSize = Math.min(quadrantWidth, quadrantHeight);
-
-            graphCanvas.width = graphSize;
-            graphCanvas.height = graphSize;
-
             graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+
+            const graphSize = graphCanvas.width;
 
             for (let i = 0; i < plot_points; i++) {
                 const plot_a = lerp(0, 2 * Math.PI, i / plot_points);
@@ -236,10 +263,10 @@
 
                     graphCtx.fillStyle = 'green';
                     graphCtx.beginPath();
-                    graphCtx.arc(a_screen, b_plus_screen, 2, 0, 2 * Math.PI);
+                    graphCtx.arc(a_screen, b_plus_screen, 0.002*graphSize, 0, 2 * Math.PI);
                     graphCtx.fill();
                     graphCtx.beginPath();
-                    graphCtx.arc(a_screen, b_minus_screen, 2, 0, 2 * Math.PI);
+                    graphCtx.arc(a_screen, b_minus_screen, 0.002*graphSize, 0, 2 * Math.PI);
                     graphCtx.fill();
                 }
             }
@@ -250,22 +277,9 @@
             requestAnimationFrame(drawGraph);
         }
 
-        function onResize() {
-            linkageCanvas.width = linkageCanvas.parentElement.clientWidth;
-            linkageCanvas.height = linkageCanvas.parentElement.clientHeight;
-            drawLinkage();
-            drawGraph();
-        }
-
-        window.addEventListener('resize', onResize);
-        window.addEventListener('wheel', (e) => {
-            scale *= e.deltaY < 0 ? 1.1 : 0.9;
-            drawLinkage();
-        });
-
         linkageCanvas.addEventListener('mousedown', (e) => {
             mouseDown = true;
-            panStart = { x: e.clientX - a_pos.x, y: e.clientY - a_pos.y };
+            lastMousePos = { x: e.clientX, y: e.clientY };
         });
 
         linkageCanvas.addEventListener('mouseup', () => {
@@ -274,30 +288,67 @@
 
         linkageCanvas.addEventListener('mousemove', (e) => {
             if (mouseDown) {
-                a_pos.x = e.clientX - panStart.x;
-                a_pos.y = e.clientY - panStart.y;
-                drawLinkage();
+                const dx = e.clientX - lastMousePos.x;
+                const dy = e.clientY - lastMousePos.y;
+                offsetX += dx;
+                offsetY += dy;
+                lastMousePos = { x: e.clientX, y: e.clientY };
             }
+        });
+
+        linkageCanvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoom = e.deltaY > 0 ? 0.9 : 1.1;
+            scale *= zoom;
+
+            const mouseX = e.clientX - linkageCanvas.getBoundingClientRect().left;
+            const mouseY = e.clientY - linkageCanvas.getBoundingClientRect().top;
+
+            offsetX -= mouseX / scale * (zoom - 1);
+            offsetY -= mouseY / scale * (zoom - 1);
+        });
+
+        let sliderMouseDown = {
+            x1: false,
+            x2: false,
+            x3: false,
+            x4: false
+        };
+
+        function updateSliders() {
+            if (sliderMouseDown.x1) x1 += parseFloat(sliders.x1.value) / 100;
+            if (sliderMouseDown.x2) x2 += parseFloat(sliders.x2.value) / 100;
+            if (sliderMouseDown.x3) x3 += parseFloat(sliders.x3.value) / 100;
+            if (sliderMouseDown.x4) x4 += parseFloat(sliders.x4.value) / 100;
+        }
+
+        function resetSliders() {
+            if (!sliderMouseDown.x1) sliders.x1.value = 0;
+            if (!sliderMouseDown.x2) sliders.x2.value = 0;
+            if (!sliderMouseDown.x3) sliders.x3.value = 0;
+            if (!sliderMouseDown.x4) sliders.x4.value = 0;
+        }
+
+        sliders.x1.addEventListener('mousedown', () => sliderMouseDown.x1 = true);
+        sliders.x2.addEventListener('mousedown', () => sliderMouseDown.x2 = true);
+        sliders.x3.addEventListener('mousedown', () => sliderMouseDown.x3 = true);
+        sliders.x4.addEventListener('mousedown', () => sliderMouseDown.x4 = true);
+
+        document.addEventListener('mouseup', () => {
+            sliderMouseDown.x1 = false;
+            sliderMouseDown.x2 = false;
+            sliderMouseDown.x3 = false;
+            sliderMouseDown.x4 = false;
+            resetSliders();
         });
 
         setInterval(() => {
             a_of_turn = (a_of_turn + 0.001) % 1;
-            if (!mouseDown) {
-                Object.keys(sliders).forEach(key => {
-                    const slider = sliders[key];
-                    if (slider.value !== '0') {
-                        if (key === 'x1') x1 += parseInt(slider.value);
-                        if (key === 'x2') x2 += parseInt(slider.value);
-                        if (key === 'x3') x3 += parseInt(slider.value);
-                        if (key === 'x4') x4 += parseInt(slider.value);
-                    }
-                });
-            }
+            updateSliders();
         }, 10);
 
         drawLinkage();
         drawGraph();
-        onResize();
     </script>
 </body>
 </html>
